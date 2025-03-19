@@ -2,22 +2,28 @@ import { createStore } from 'vuex';
 
 export default createStore({
   state: {
-    excelData: []
+    user: JSON.parse(localStorage.getItem('user')) || null,
   },
   mutations: {
-    setExcelData(state, data) {
-      state.excelData = data;
+    setUser(state, user) {
+      state.user = user;
+      localStorage.setItem('user', JSON.stringify(user));
     },
-    clearExcelData(state) {
-      state.excelData = [];
-    }
+    logout(state) {
+      state.user = null;
+      localStorage.removeItem('user');
+    },
   },
   actions: {
-    updateExcelData({ commit }, data) {
-      commit('setExcelData', data);
-    }
+    login({ commit }, user) {
+      commit('setUser', user);
+    },
+    logout({ commit }) {
+      commit('logout');
+    },
   },
   getters: {
-    getExcelData: (state) => state.excelData
-  }
+    isAuthenticated: state => !!state.user,
+    getUser: state => state.user,
+  },
 });

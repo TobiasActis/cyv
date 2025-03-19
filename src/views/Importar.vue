@@ -28,7 +28,6 @@
 
 <script>
 import * as XLSX from 'xlsx';
-import { mapActions } from 'vuex';
 
 export default {
   name: 'Importar',
@@ -39,7 +38,6 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['updateExcelData']),
     handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -56,7 +54,6 @@ export default {
 
         this.headers = jsonData[0];
         this.excelData = jsonData.slice(1);
-        this.updateExcelData(jsonData.slice(1)); // Guardar en la store
 
         // Llamar a la función para enviar los datos a PHP
         const mappedData = this.mapData(jsonData.slice(1));
@@ -69,12 +66,20 @@ export default {
     mapData(data) {
       return data.map(row => ({
         numero: row[3] || '',
-        cliente: row[11] || '',
-        banco: row[6] || '',
-        importe: row[18] || 0,
-        vencimiento: row[10] || '',
-        estado: row[24] || ''
+        cliente: row[12] || '',
+        banco: row[7] || '',
+        importe: parseFloat(row[18]) || 0,
+        vencimiento: this.formatDate(row[10]) || '',
+        fecha_ingreso: this.formatDate(row[9]) || '',
+        estado: row[23] || ''
       }));
+    },
+    formatDate(dateString) {
+      if (typeof dateString !== 'string') {
+        return '';
+      }
+      const [day, month, year] = dateString.split('/');
+      return `${year}-${month}-${day}`;
     },
     guardarDatos(cheques) {
       console.log('cheques:', cheques);
@@ -91,6 +96,7 @@ export default {
       .then(data => {
         if (data.error) {
           alert('Error: ' + data.error);
+          console.error('Error:', data.error);
         } else {
           alert('Datos guardados con éxito');
           console.log(data);

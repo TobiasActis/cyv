@@ -9,6 +9,7 @@
             <th>Cliente</th>
             <th>Banco</th>
             <th>Importe</th>
+            <th>Fecha de Ingreso</th>
             <th>Vencimiento</th>
             <th>Estado</th>
             <th>Acciones</th>
@@ -19,11 +20,14 @@
             <td>{{ cheque.numero }}</td>
             <td>{{ cheque.cliente }}</td>
             <td>{{ cheque.banco }}</td>
-            <td>{{ cheque.importe }}</td>
+            <td>{{ formatCurrency(cheque.importe) }}</td>
+            <td>{{ cheque.fecha_ingreso }}</td>
             <td>{{ cheque.vencimiento }}</td>
             <td>{{ cheque.estado }}</td>
             <td>
               <!-- Aquí puedes agregar botones para acciones -->
+              <button @click="editarCheque(cheque.id)">Editar</button>
+              <button @click="eliminarCheque(cheque.id)">Eliminar</button>
             </td>
           </tr>
         </tbody>
@@ -53,6 +57,17 @@ export default {
         console.error("Error al obtener los cheques:", error);
       }
     },
+    editarCheque(id) {
+      // Lógica para editar cheque
+      console.log("Editar cheque con ID:", id);
+    },
+    eliminarCheque(id) {
+      // Lógica para eliminar cheque
+      console.log("Eliminar cheque con ID:", id);
+    },
+    formatCurrency(value) {
+      return `$${value.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
   },
 };
 </script>

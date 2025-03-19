@@ -1,16 +1,14 @@
 <?php
-$servername = "localhost";  // Nombre del servidor, si estás usando XAMPP es localhost
-$username = "root";         // Tu nombre de usuario de MySQL, por defecto es root
-$password = "";             // Tu contraseña de MySQL, por defecto está vacía
-$dbname = "cyv";            // Nombre de la base de datos que creaste en phpMyAdmin
+$servername = "localhost";
+$username = "root"; // Cambia esto si tu usuario de MySQL es diferente
+$password = ""; // Cambia esto si tu contraseña de MySQL es diferente
+$dbname = "cyv"; // Cambia esto si tu base de datos tiene un nombre diferente
 
 // Crear conexión
 $conn = new mysqli($servername, $username, $password, $dbname);
 
-// Verificar la conexión
+// Verificar conexión
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
-} else {
-    echo "Conexión exitosa a la base de datos!";
 }
 ?>

@@ -6,34 +6,41 @@ header('Content-Type: application/json');
 
 include('db.php');
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    // Responder a las solicitudes OPTIONS
+    exit;
+}
+
 $data = json_decode(file_get_contents('php://input'), true);
 
-$response = [];
+if (empty($data)) {
+    echo json_encode(['error' => 'No data received']);
+    exit;
+}
 
-if (is_array($data)) {
-    $stmt = $conn->prepare("INSERT INTO cheques (numero, cliente, banco, importe, vencimiento, estado) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssss", $numero, $cliente, $banco, $importe, $vencimiento, $estado);
-
-    foreach ($data as $cheque) {
-        $numero = $cheque['numero'] ?? '';
-        $cliente = $cheque['cliente'] ?? '';
-        $banco = $cheque['banco'] ?? '';
-        $importe = $cheque['importe'] ?? 0;
-        $vencimiento = $cheque['vencimiento'] ?? '';
-        $estado = $cheque['estado'] ?? '';
-
-        if (!$stmt->execute()) {
-            $response['error'] = "Error: " . $stmt->error;
-            echo json_encode($response);
-            exit();
-        }
-    }
-    $response['success'] = "Datos guardados con éxito";
+foreach ($data as $cheque) {
+    // Insertar cliente si no existe
+    $stmt = $conn->prepare("INSERT INTO clientes (nombre) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)");
+    $stmt->bind_param("s", $cheque['cliente']);
+    $stmt->execute();
+    $cliente_id = $stmt->insert_id;
     $stmt->close();
-} else {
-    $response['error'] = "Datos inválidos";
+
+    // Insertar banco si no existe
+    $stmt = $conn->prepare("INSERT INTO bancos (nombre) VALUES (?) ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id)");
+    $stmt->bind_param("s", $cheque['banco']);
+    $stmt->execute();
+    $banco_id = $stmt->insert_id;
+    $stmt->close();
+
+    // Insertar cheque
+    $stmt = $conn->prepare("INSERT INTO cheques (numero, cliente, banco, importe, vencimiento, fecha_ingreso, estado) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("siidsss", $cheque['numero'], $cliente_id, $banco_id, $cheque['importe'], $cheque['vencimiento'], $cheque['fecha_ingreso'], $cheque['estado']);
+    $stmt->execute();
+    $stmt->close();
 }
 
 $conn->close();
-echo json_encode($response);
+
+echo json_encode(['success' => true]);
 ?>
